@@ -473,6 +473,19 @@ function renderWeeklyPlan() {
         return;
     }
 
+    // Add controls: Save, New, Load dropdown
+    const controlsDiv = document.createElement('div');
+    controlsDiv.className = 'plan-controls';
+    controlsDiv.innerHTML = `
+        <button id="savePlanBtn">Save Plan</button>
+        <button id="newPlanBtn">New Plan</button>
+        <select id="loadPlanSelect"><option value="">-- Load Saved Plan --</option></select>
+    `;
+    weeklyPlanContainer.appendChild(controlsDiv);
+
+    // Populate Load Plan dropdown
+    populateSavedPlans();
+
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const meals = ['breakfast', 'lunch', 'dinner'];
 
@@ -485,7 +498,7 @@ function renderWeeklyPlan() {
             const recipe = plan[day][meal];
             const content = recipe ? 
                 `<span class="meal-content">${recipe.name} <button class="remove-btn" data-day="${day}" data-meal="${meal}">X</button></span>` :
-                `Empty Slot`;
+                `Empty Slot` + renderMealSuggestions(day, meal);
 
             const mealSlot = document.createElement('div');
             mealSlot.className = 'meal-slot';
@@ -496,9 +509,103 @@ function renderWeeklyPlan() {
 
         weeklyPlanContainer.appendChild(dayCard);
     });
+
+    attachRemoveListeners();
+    attachSuggestionListeners();
+
+    // Button event listeners
+    document.getElementById('savePlanBtn').addEventListener('click', handleSavePlan);
+    document.getElementById('newPlanBtn').addEventListener('click', createNewPlan);
+    document.getElementById('loadPlanSelect').addEventListener('change', handleLoadPlan);
 }
 
+// -----------------
+// Meal Suggestions
+// -----------------
+function renderMealSuggestions(day, meal) {
+    const suggestions = getRecipeSuggestions(meal); // replace with API/db call
+    const suggestionHTML = suggestions.map(r => 
+        `<button class="suggestion-btn" data-day="${day}" data-meal="${meal}" data-recipe='${JSON.stringify(r)}'>
+            ${r.name}
+        </button>`).join(' ');
+    return `<div class="meal-suggestions">${suggestionHTML}</div>`;
+}
+
+function attachSuggestionListeners() {
+    document.querySelectorAll('.suggestion-btn').forEach(btn => {
+        btn.addEventListener('click', e => {
+            const day = e.target.dataset.day;
+            const meal = e.target.dataset.meal;
+            const recipe = JSON.parse(e.target.dataset.recipe);
+            const plan = getMealPlan(currentUser);
+            plan[day][meal] = recipe;
+            saveMealPlan(currentUser, plan);
+            renderWeeklyPlan();
+        });
+    });
+}
+
+// -----------------
+// Save / New / Load Plan
+// -----------------
+function handleSavePlan() {
+    if (!currentUser) return alert("Sign in to save your plan");
+    const planName = prompt("Enter a name for your meal plan:");
+    if (!planName) return;
+    const plan = getMealPlan(currentUser);
+    const userPlans = JSON.parse(localStorage.getItem(currentUser)) || {};
+    userPlans[planName] = plan;
+    localStorage.setItem(currentUser, JSON.stringify(userPlans));
+    alert(`Plan "${planName}" saved!`);
+    populateSavedPlans();
+}
+
+function createNewPlan() {
+    if (!currentUser) return alert("Sign in to create a new plan");
+    const emptyPlan = generateEmptyPlan();
+    setMealPlan(currentUser, emptyPlan);
+    renderWeeklyPlan();
+}
+
+function handleLoadPlan(e) {
+    const planName = e.target.value;
+    if (!planName || !currentUser) return;
+
+    const userPlans = JSON.parse(localStorage.getItem(currentUser)) || {};
+    const selectedPlan = userPlans[planName];
+    if (!selectedPlan) return;
+
+    setMealPlan(currentUser, selectedPlan);
+    renderWeeklyPlan();
+}
+
+function generateEmptyPlan() {
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const meals = ['breakfast','lunch','dinner'];
+    const plan = {};
+    days.forEach(d => {
+        plan[d] = {};
+        meals.forEach(m => plan[d][m] = null);
+    });
+    return plan;
+}
+
+function populateSavedPlans() {
+    const select = document.getElementById('loadPlanSelect');
+    select.innerHTML = '<option value="">-- Load Saved Plan --</option>';
+    if (!currentUser) return;
+    const userPlans = JSON.parse(localStorage.getItem(currentUser)) || {};
+    Object.keys(userPlans).forEach(planName => {
+        const option = document.createElement('option');
+        option.value = planName;
+        option.textContent = planName;
+        select.appendChild(option);
+    });
+}
+
+// -----------------
 // Remove meal from plan via delegation
+// -----------------
 weeklyPlanContainer.addEventListener('click', (e) => {
     if (e.target.classList.contains('remove-btn')) {
         const day = e.target.getAttribute('data-day');
@@ -513,6 +620,9 @@ weeklyPlanContainer.addEventListener('click', (e) => {
     }
 });
 
+// -----------------
+// Modal logic for adding a selected recipe
+// -----------------
 planModalClose.addEventListener('click', () => {
     planModal.style.display = 'none';
     selectedRecipeForPlan = null;
@@ -525,10 +635,7 @@ planConfirmBtn.addEventListener('click', () => {
     if (!day || !meal || !selectedRecipeForPlan) return alert('Please select a day and meal.');
 
     const plan = getMealPlan(currentUser);
-    // Save minimal data to meal plan
-    const recipeStub = { 
-        name: selectedRecipeForPlan.name
-    };
+    const recipeStub = { name: selectedRecipeForPlan.name };
     
     plan[day][meal] = recipeStub;
     saveMealPlan(currentUser, plan);
@@ -536,8 +643,9 @@ planConfirmBtn.addEventListener('click', () => {
 
     planModal.style.display = 'none';
     selectedRecipeForPlan = null;
-    renderWeeklyPlan(); // Update the plan tab
+    renderWeeklyPlan();
 });
+
 
 
 // -----------------
