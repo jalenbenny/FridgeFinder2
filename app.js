@@ -54,7 +54,7 @@ let selectedRecipeForComment = null; // Store recipe object for current modal
 // -----------------
 async function loadRecipes() {
     try {
-        const res = await fetch('data/recipes.json'); 
+        const res = await fetch('recipes.json'); 
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         allRecipes = await res.json();
         console.log('Recipes loaded:', allRecipes.length);
@@ -112,50 +112,80 @@ function getIngredientEmoji(ingredient) {
     
 
 // -----------------
-// Authentication Logic
+// Authentication Logic (NO EVENT LISTENERS)
 // -----------------
-function showMainContent(username){
-    authDiv.style.display='none';
-    mainContent.style.display='block';
-    displayUser.textContent=username;
-    currentUser=username;
-    localStorage.setItem('currentUser',username);
-    
-    renderFavorites(); 
-    renderGeneralComments(); 
+
+function signIn() {
+    const user = usernameInput.value.trim();
+    const pass = passwordInput.value;
+
+    if (!user || !pass) {
+        authMessage.textContent = 'Enter username and password';
+        return;
+    }
+
+    const users = getUsers();
+    if (users[user] && users[user] === pass) {
+        authMessage.textContent = '';
+        showMainContent(user);
+    } else {
+        authMessage.textContent = 'Invalid username or password';
+    }
+}
+
+function signUp() {
+    const user = usernameInput.value.trim();
+    const pass = passwordInput.value;
+
+    if (!user || !pass) {
+        authMessage.textContent = 'Enter username and password';
+        return;
+    }
+
+    const users = getUsers();
+    if (users[user]) {
+        authMessage.textContent = 'Username already exists';
+        return;
+    }
+
+    saveUser(user, pass);
+    authMessage.textContent = '';
+    showMainContent(user);
+}
+
+function signOut() {
+    showAuth();
+}
+
+function showMainContent(username) {
+    authDiv.style.display = 'none';
+    mainContent.style.display = 'block';
+    displayUser.textContent = username;
+    currentUser = username;
+
+    localStorage.setItem('currentUser', username);
+
+    renderFavorites();
+    renderGeneralComments();
     renderWeeklyPlan();
-    
-    // Default to the first tab (Search)
+
     switchTab('search');
 }
 
-function showAuth(){
-    authDiv.style.display='flex';
-    mainContent.style.display='none';
-    usernameInput.value=''; passwordInput.value=''; currentUser=null;
+function showAuth() {
+    authDiv.style.display = 'flex';
+    mainContent.style.display = 'none';
+
+    usernameInput.value = '';
+    passwordInput.value = '';
+    currentUser = null;
+
     localStorage.removeItem('currentUser');
-    
-    // Clear dynamic content on sign out
+
     resultsDiv.innerHTML = '';
     document.getElementById('favorites-list').innerHTML = '';
 }
 
-// Attach event listeners for auth buttons
-signInBtn.addEventListener('click', ()=>{
-    const user=usernameInput.value.trim(), pass=passwordInput.value;
-    if(!user||!pass){ authMessage.textContent='Enter username and password'; return; }
-    const users=getUsers();
-    if(users[user]&&users[user]===pass){ showMainContent(user); authMessage.textContent=''; }
-    else authMessage.textContent='Invalid username or password';
-});
-signUpBtn.addEventListener('click', ()=>{
-    const user=usernameInput.value.trim(), pass=passwordInput.value;
-    if(!user||!pass){ authMessage.textContent='Enter username and password'; return; }
-    const users=getUsers();
-    if(users[user]){ authMessage.textContent='Username already exists'; return; }
-    saveUser(user,pass); showMainContent(user); authMessage.textContent='';
-});
-signOutBtn.addEventListener('click', ()=>{ showAuth(); });
 
 // -----------------
 // Tabs Logic
