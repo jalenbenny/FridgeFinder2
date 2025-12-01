@@ -101,9 +101,15 @@ function saveMealPlan(username, mealPlan) { localStorage.setItem(`mealPlan_${use
 // -----------------
 function getIngredientEmoji(ingredient) {
     const mapping = { "bread":"🥖","pasta":"🍝","cheese":"🧀","milk":"🥛","nuts":"🌰","eggs":"🥚","butter":"🧈","avocado":"🥑","tomato":"🍅","banana":"🍌","strawberry":"🍓","lettuce":"🥬","rice":"🍚","peanut butter":"🥜","jelly":"🍇","naan":"🍞","soy sauce":"🧂","olive oil":"🫒","salt":"🧂","tomato sauce":"🍅","chicken":"🍗","beef":"🥩","pork":"🥓","fish":"🐟"};
-    for(const key in mapping){ if(ingredient.toLowerCase().includes(key)) return mapping[key]; }
-    return "";
+    for(const key in mapping) { 
+        if(ingredient.toLowerCase().includes(key)) {
+            return mapping[key]; 
+        }
+    }
+
+    return "🧺"; // fallback emoji
 }
+    
 
 // -----------------
 // Authentication Logic
@@ -188,10 +194,16 @@ function getAllIngredients(){
 function createIngredientBoxes(){
     const container=document.getElementById('ingredients-container');
     container.innerHTML='';
-    if(allRecipes.length===0){ container.innerHTML='<div class="no-results">Loading recipes...</div>'; return; }
+    
+    if(allRecipes.length===0){ 
+        container.innerHTML='<div class="no-results">Loading recipes...</div>';
+        return; }
     
     const ingredients=getAllIngredients();
-    if(ingredients.length===0){ container.innerHTML='<div class="no-results">No ingredients found.</div>'; return; }
+    if(ingredients.length===0){ 
+        container.innerHTML='<div class="no-results">No ingredients found.</div>'; 
+        return;
+    }
     
     ingredients.forEach(ing=>{
         const box=document.createElement('div'); 
@@ -205,6 +217,7 @@ function createIngredientBoxes(){
         container.appendChild(box);
     });
 }
+
 
 function getSelectedIngredients(){ 
     return Array.from(document.querySelectorAll('#ingredients-container .ingredient-box.selected'))
