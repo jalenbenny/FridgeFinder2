@@ -460,7 +460,6 @@ recipeCommentModalClose.addEventListener('click', () => {
     selectedRecipeForComment = null;
 });
 
-
 // -----------------
 // Weekly Plan Logic
 // -----------------
@@ -489,7 +488,7 @@ function renderWeeklyPlan() {
             const recipe = plan[day][meal];
             const content = recipe ? 
                 `<span class="meal-content">${recipe.name} <button class="remove-btn" data-day="${day}" data-meal="${meal}">X</button></span>` :
-                `Empty Slot <button class="suggest-btn" data-day="${day}" data-meal="${meal}">💡 Suggest</button>`;
+                `Empty Slot`;
 
             const mealSlot = document.createElement('div');
             mealSlot.className = 'meal-slot';
@@ -525,10 +524,8 @@ function addPlanControls() {
     weeklyPlanContainer.prepend(controlsDiv);
 
     // Event: New Plan
-    const newPlanBtn = document.getElementById('newPlanBtn');
-    newPlanBtn.addEventListener('click', () => {
+    document.getElementById('newPlanBtn').addEventListener('click', () => {
         if (!currentUser) return alert('Please sign in to create a new plan.');
-
         const planName = prompt('Enter a name for your new weekly plan:', 'My Plan');
         if (!planName) return;
 
@@ -547,8 +544,7 @@ function addPlanControls() {
     });
 
     // Event: Save Plan
-    const savePlanBtn = document.getElementById('savePlanBtn');
-    savePlanBtn.addEventListener('click', () => {
+    document.getElementById('savePlanBtn').addEventListener('click', () => {
         if (!currentUser) return alert('Please sign in to save your plan.');
         const planName = prompt('Enter a name to save this plan:', 'My Saved Plan');
         if (!planName) return;
@@ -558,10 +554,9 @@ function addPlanControls() {
         alert(`Plan "${planName}" saved!`);
     });
 
-    // Event: Load Plan (optional)
-    const loadPlanSelect = document.getElementById('loadPlanSelect');
-    loadPlanSelect.addEventListener('change', () => {
-        const selected = loadPlanSelect.value;
+    // Event: Load Plan
+    document.getElementById('loadPlanSelect').addEventListener('change', () => {
+        const selected = document.getElementById('loadPlanSelect').value;
         if (!selected) return;
         loadMealPlan(currentUser, selected);
         renderWeeklyPlan();
@@ -575,7 +570,6 @@ weeklyPlanContainer.addEventListener('click', (e) => {
     if (e.target.classList.contains('remove-btn')) {
         const day = e.target.getAttribute('data-day');
         const meal = e.target.getAttribute('data-meal');
-        
         if (currentUser && day && meal) {
             const plan = getMealPlan(currentUser);
             plan[day][meal] = null;
@@ -583,14 +577,43 @@ weeklyPlanContainer.addEventListener('click', (e) => {
             renderWeeklyPlan();
         }
     }
-
-    // Meal suggestion click
-    if (e.target.classList.contains('suggest-btn')) {
-        const day = e.target.getAttribute('data-day');
-        const meal = e.target.getAttribute('data-meal');
-        showRecipeSuggestions(day, meal); // your existing function to display suggestions
-    }
 });
+
+// -----------------
+// Suggestions Panel Logic
+// -----------------
+const suggestionsList = document.getElementById('suggestions-list');
+
+document.querySelectorAll('.suggestion-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const mealType = btn.getAttribute('data-meal');
+        showMealSuggestions(mealType);
+    });
+});
+
+function showMealSuggestions(mealType) {
+    const exampleSuggestions = {
+        breakfast: ['Pancakes', 'Oatmeal', 'Smoothie Bowl'],
+        lunch: ['Chicken Salad', 'Veggie Wrap', 'Grilled Cheese'],
+        dinner: ['Spaghetti Bolognese', 'Grilled Salmon', 'Stir Fry Vegetables']
+    };
+
+    const suggestions = exampleSuggestions[mealType] || [];
+    suggestionsList.innerHTML = '';
+
+    suggestions.forEach(recipeName => {
+        const li = document.createElement('li');
+        li.style.cursor = 'pointer';
+        li.style.margin = '5px 0';
+        li.textContent = recipeName;
+        li.addEventListener('click', () => {
+            selectedRecipeForPlan = { name: recipeName };
+            planMealSelect.value = mealType;
+            planModal.style.display = 'flex';
+        });
+        suggestionsList.appendChild(li);
+    });
+}
 
 // -----------------
 // Plan Modal Handlers
@@ -603,13 +626,10 @@ planModalClose.addEventListener('click', () => {
 planConfirmBtn.addEventListener('click', () => {
     const day = planDaySelect.value;
     const meal = planMealSelect.value;
-
     if (!day || !meal || !selectedRecipeForPlan) return alert('Please select a day and meal.');
 
     const plan = getMealPlan(currentUser);
-    const recipeStub = { name: selectedRecipeForPlan.name };
-    
-    plan[day][meal] = recipeStub;
+    plan[day][meal] = { name: selectedRecipeForPlan.name };
     saveMealPlan(currentUser, plan);
     alert(`${selectedRecipeForPlan.name} added to your ${day} ${meal}!`);
 
@@ -617,34 +637,6 @@ planConfirmBtn.addEventListener('click', () => {
     selectedRecipeForPlan = null;
     renderWeeklyPlan();
 });
-
-
-// -----------------
-// Modal logic for adding a selected recipe
-// -----------------
-planModalClose.addEventListener('click', () => {
-    planModal.style.display = 'none';
-    selectedRecipeForPlan = null;
-});
-
-planConfirmBtn.addEventListener('click', () => {
-    const day = planDaySelect.value;
-    const meal = planMealSelect.value;
-
-    if (!day || !meal || !selectedRecipeForPlan) return alert('Please select a day and meal.');
-
-    const plan = getMealPlan(currentUser);
-    const recipeStub = { name: selectedRecipeForPlan.name };
-    
-    plan[day][meal] = recipeStub;
-    saveMealPlan(currentUser, plan);
-    alert(`${selectedRecipeForPlan.name} added to your ${day} ${meal}!`);
-
-    planModal.style.display = 'none';
-    selectedRecipeForPlan = null;
-    renderWeeklyPlan();
-});
-
 
 
 // -----------------
