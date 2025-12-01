@@ -68,17 +68,18 @@
                 <section>
                     <h3>📊 Search Results</h3>
                     <div id="results">
-                        </div>
+                    </div>
                 </section>
             </div>
 
             <div id="plan" class="tab-content" style="display:none;">
                 <section class="section-header">
                     <h2>📅 Weekly Meal Plan</h2>
+                    <p class="helper-text">Click a suggested recipe in an empty slot to quickly add it to your plan.</p>
                 </section>
-                
+
                 <div id="weekly-plan-container" class="weekly-plan">
-                    </div>
+                </div>
             </div>
 
             <div id="favorites" class="tab-content" style="display:none;">
@@ -86,7 +87,7 @@
                     <h2>⭐ My Favorite Recipes</h2>
                 </section>
                 <div id="favorites-list">
-                    </div>
+                </div>
             </div>
 
             <div id="general-comments" class="tab-content" style="display:none;">
@@ -100,10 +101,13 @@
                 
                 <h3>Recent Posts:</h3>
                 <div id="general-comments-container">
-                    </div>
+                </div>
             </div>
         </div>
-    </div> <div id="plan-modal" class="modal-overlay">
+    </div>
+
+    <!-- Plan Modal -->
+    <div id="plan-modal" class="modal-overlay">
         <div class="modal-content">
             <span class="modal-close" id="plan-modal-close">&times;</span>
             <h3>Add Recipe to Plan</h3>
@@ -131,13 +135,14 @@
         </div>
     </div>
 
+    <!-- Recipe Comment Modal -->
     <div id="recipe-comment-modal" class="modal-overlay">
         <div class="modal-content">
             <span class="modal-close" id="recipe-comment-modal-close">&times;</span>
             <h3 id="comment-recipe-name">Comments for [Recipe Name]</h3>
             
             <div id="recipe-comments-list">
-                </div>
+            </div>
 
             <div class="comment-input-area">
                 <textarea id="recipe-comment-textarea" placeholder="Add your review or cooking notes..."></textarea>
