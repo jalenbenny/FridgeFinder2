@@ -75,10 +75,25 @@
             <div id="plan" class="tab-content" style="display:none;">
                 <section class="section-header">
                     <h2>📅 Weekly Meal Plan</h2>
-                    <p class="helper-text">Click a suggested recipe in an empty slot to quickly add it to your plan.</p>
+                    <p class="helper-text">Use the suggestions panel to quickly add meals to your weekly plan.</p>
                 </section>
 
-                <div id="weekly-plan-container" class="weekly-plan">
+                <div class="weekly-plan-wrapper" style="display: flex; gap: 20px;">
+                    <!-- Weekly Plan Grid -->
+                    <div id="weekly-plan-container" class="weekly-plan" style="flex: 3;">
+                    </div>
+
+                    <!-- Suggestions Panel -->
+                    <div id="suggestions-panel" style="flex: 1; background: var(--color-accent-light); padding: 15px; border-radius: 10px; box-shadow: 0 2px 4px var(--color-shadow);">
+                        <h3>💡 Suggestions</h3>
+                        <div id="suggestions-content">
+                            <p>Select a meal type to see suggestions.</p>
+                            <button class="suggestion-btn btn btn-secondary" data-meal="breakfast">Breakfast</button>
+                            <button class="suggestion-btn btn btn-secondary" data-meal="lunch">Lunch</button>
+                            <button class="suggestion-btn btn btn-secondary" data-meal="dinner">Dinner</button>
+                            <ul id="suggestions-list" style="margin-top: 10px; list-style: disc; padding-left: 20px;"></ul>
+                        </div>
+                    </div>
                 </div>
             </div>
 
