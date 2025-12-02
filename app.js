@@ -461,7 +461,7 @@ recipeCommentModalClose.addEventListener('click', () => {
 });
 
 // -----------------
-// Weekly Plan Logic
+// Updated Weekly Plan Logic (ability to save, create different plans)
 // -----------------
 function renderWeeklyPlan() {
     const plan = currentUser ? getMealPlan(currentUser) : null;
@@ -523,7 +523,7 @@ function addPlanControls() {
 
     weeklyPlanContainer.prepend(controlsDiv);
 
-    // Event: New Plan
+    // new event: New Plan
     document.getElementById('newPlanBtn').addEventListener('click', () => {
         if (!currentUser) return alert('Please sign in to create a new plan.');
         const planName = prompt('Enter a name for your new weekly plan:', 'My Plan');
@@ -543,7 +543,7 @@ function addPlanControls() {
         alert(`New plan "${planName}" created!`);
     });
 
-    // Event: Save Plan
+    // new Event: Save Plan
     document.getElementById('savePlanBtn').addEventListener('click', () => {
         if (!currentUser) return alert('Please sign in to save your plan.');
         const planName = prompt('Enter a name to save this plan:', 'My Saved Plan');
@@ -554,7 +554,7 @@ function addPlanControls() {
         alert(`Plan "${planName}" saved!`);
     });
 
-    // Event: Load Plan
+    // new vent: Load Plan
     document.getElementById('loadPlanSelect').addEventListener('change', () => {
         const selected = document.getElementById('loadPlanSelect').value;
         if (!selected) return;
